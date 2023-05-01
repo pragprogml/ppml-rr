@@ -1,0 +1,87 @@
+version: "3.7"
+
+services:
+    minio:
+        restart: always
+        image: minio/minio@sha256:02b9d0234025a31b1fb2a52697b62a18a4fbd0db03cbd83dfc09fc48773b718c
+        container_name: mlflow-s3
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        command: server /data --console-address ':9001' --address ':9000'
+        environment:
+            - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID}
+            - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY}
+        volumes:
+            - minio_data:/data
+        labels:
+          logging: "promtail"
+          logging_jobname: "containerlogs"
+
+    mc:
+        image: minio/mc@sha256:c631532a394eb0e2c54cfc6f28a98c4d261924f17886763ee45c786c32c9f4a1
+        depends_on:
+            - minio
+        container_name: mc
+        environment:
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+        entrypoint: >
+            /bin/sh -c "
+            /tmp/wait-for-it.sh minio:9000 &&
+            echo ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} &&
+            /usr/bin/mc alias set minio http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} &&
+            /usr/bin/mc mb minio/mlflow;
+            /usr/bin/mc mb minio/data;
+            exit 0;
+            "
+        volumes:
+            - ../../docker/mlflow/wait-for-it.sh:/tmp/wait-for-it.sh
+        labels:
+          logging: "promtail"
+          logging_jobname: "containerlogs"
+
+    db:
+        restart: always
+        image: mysql/mysql-server@sha256:d6c8301b7834c5b9c2b733b10b7e630f441af7bc917c74dba379f24eeeb6a313
+        container_name: mlflow-db
+        ports:
+            - "3306:3306"
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - dbdata:/var/lib/mysql
+        labels:
+          logging: "promtail"
+          logging_jobname: "containerlogs"
+
+    web:
+        restart: always
+        build: ./docker/mlflow
+        image: mlflow_server
+        container_name: mlflow-server
+        depends_on:
+            - mc
+            - db
+        ports:
+            - "8081:5000"
+        environment:
+            - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+        command: mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} --default-artifact-root s3://mlflow/ --host 0.0.0.0
+        labels:
+          logging: "promtail"
+          logging_jobname: "containerlogs"
+
+volumes:
+    dbdata:
+    minio_data:
+
+networks:
+    default:
+      external: true
+      name: ${PPML_RR_NETWORK}

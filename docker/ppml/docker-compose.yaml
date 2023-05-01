@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  ppml-rr:
+    image: ppml_rr:latest
+    ports:
+      - "3000:3000"
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    environment:
+        - BENTO_MODEL=${BENTO_MODEL}
+    command: ["serve", "--production"]
+
+networks:
+  default:
+    external: true
+    name: ${PPML_RR_NETWORK}

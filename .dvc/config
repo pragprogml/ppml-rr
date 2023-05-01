@@ -1,0 +1,7 @@
+[core]
+    analytics = false
+    remote = minio
+    autostage = true
+['remote "minio"']
+    url = s3://data
+    endpointurl = http://localhost:9000

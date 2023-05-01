@@ -1,0 +1,40 @@
+{
+	"info": {
+		"_postman_id": "41fad35c-df82-4ca4-88b6-1b1bea5579aa",
+		"name": "PPML RR",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Evaluate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data\"",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "resources/benchmark/valid/2103.01035.pdf"
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/classify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"classify"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

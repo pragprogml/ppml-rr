@@ -1,0 +1,41 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+arxiv = "*"
+pypdf = "*"
+clean-text = "*"
+unidecode = "*"
+gensim = "*"
+scipy = "*"
+retry = "*"
+parfive = "*"
+boto3 = "*"
+bentoml = "*"
+numpy = "*"
+mlflow = "*"
+dvc = "*"
+smart-open = "*"
+requests = "*"
+
+[dev-packages]
+ruff = "*"
+jupyterlab = "*"
+line-profiler = "*"
+isort = "*"
+pylint = "*"
+pytest = "*"
+black = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+
+[requires]
+python_version = "3.10"
+
+[scripts]
+isort = "isort ."
+format = "black ."
+lint = "ruff src/"
+test = "pipenv run pytest tests/ -W ignore::DeprecationWarning -v"
