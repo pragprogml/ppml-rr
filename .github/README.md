@@ -5,7 +5,7 @@
 
 <h1 align="center">
 	<img width="200"
-		src="https://raw.githubusercontent.com/pragprogml/ppml-rr/main/media/ppml-cover.svg?token=GHSAT0AAAAAACAOY62F5RF2ZUBJTUAQXOM6ZB65TDA">
+		src="https://raw.githubusercontent.com/pragprogml/ppml-rr/main/media/ppml-cover.svg">
 </h1>
 
 <h3 align="center">
